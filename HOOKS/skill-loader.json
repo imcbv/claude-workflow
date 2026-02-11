@@ -1,0 +1,11 @@
+{
+  "name": "force-skill-loader",
+  "description": "Force Claude to load skills and CLAUDE.md before every prompt (workaround for current bug)",
+  "hook": {
+    "event": "PrePrompt",
+    "command": "echo 'Loading skills and CLAUDE.md context...' && cat ~/.claude/skills/*/SKILL.md .claude/CLAUDE.md 2>/dev/null | head -100"
+  },
+  "usage": "Copy this hook to .claude/settings.json in your project",
+  "when_to_use": "ALL projects (fixes CLAUDE.md being ignored bug)",
+  "bug_ref": "r/ClaudeCode - CLAUDE.md ignored since Feb 2026 update"
+}

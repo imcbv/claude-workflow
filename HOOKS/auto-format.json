@@ -1,0 +1,15 @@
+{
+  "name": "auto-format",
+  "description": "Automatically format code after edits (Prettier for JS/TS, Black for Python)",
+  "hook": {
+    "event": "PostToolUse",
+    "filter": "Edit|Write",
+    "command": "prettier --write '**/*.{js,jsx,ts,tsx,css,json}' 2>/dev/null || black . 2>/dev/null || true"
+  },
+  "usage": "Copy this hook to .claude/settings.json in your project",
+  "when_to_use": "All projects (keeps code consistent)",
+  "requirements": [
+    "npm install -D prettier  # For JavaScript/TypeScript",
+    "pip install black  # For Python"
+  ]
+}

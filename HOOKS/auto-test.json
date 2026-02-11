@@ -1,0 +1,12 @@
+{
+  "name": "auto-test",
+  "description": "Automatically run tests after code changes. Use for PRODUCTION projects only.",
+  "hook": {
+    "event": "PostToolUse",
+    "filter": "Edit|Write",
+    "prompt": "After modifying code, verify all unit tests still pass. Run the test suite and report results."
+  },
+  "usage": "Copy this hook to .claude/settings.json in your project",
+  "when_to_use": "Production apps where tests are critical",
+  "when_to_skip": "MVP/prototype projects (slows down iteration)"
+}

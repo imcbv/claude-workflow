@@ -17,11 +17,17 @@
 # File System - Fine-grained permission control for refactoring
 # (Check if installed in Claude Code settings)
 
+# Sentry - Error tracking and debugging (NEW - Highly Recommended)
+# Install: claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+# Authenticate: /mcp (one-time OAuth)
+# See: MCP-MODULES/error-tracking.md
+
 # Sequential Thinking - Helps Claude solve complex problems methodically
 # Optional but recommended for complex refactors
 ```
 
 **Rule:** Max 2-3 MCPs per project. Too many slow down startup.
+**Exception:** Sentry MCP is lightweight and highly valuable for production apps.
 **Source:** [MCPcat guide](https://mcpcat.io/guides/best-mcp-servers-for-claude-code/)
 
 ---

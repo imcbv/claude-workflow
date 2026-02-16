@@ -19,16 +19,23 @@ echo ""
 # -----------------------------------------------------------------------------
 # Pre-flight: close running Claude Code instances
 # -----------------------------------------------------------------------------
-echo "  IMPORTANT: Close all running Claude Code instances before continuing."
-echo "  This script installs global MCPs and plugins, which can conflict"
-echo "  with running sessions."
-echo ""
-read -p "  Have you closed all Claude Code instances? [y/n]: " CLOSED
-if [ "$CLOSED" != "y" ]; then
-  echo "  Please close all Claude Code instances and run this script again."
-  exit 1
+if pgrep -f "claude" > /dev/null 2>&1; then
+  CLAUDE_COUNT=$(pgrep -f "claude" | wc -l | tr -d ' ')
+  echo "  Found $CLAUDE_COUNT running Claude Code process(es)."
+  echo "  This script installs global MCPs and plugins, which can conflict"
+  echo "  with running sessions."
+  echo ""
+  read -p "  Kill all Claude Code instances and continue? [y/n]: " KILL_CLAUDE
+  if [ "$KILL_CLAUDE" = "y" ]; then
+    pkill -f "claude" 2>/dev/null || true
+    sleep 1
+    echo "  [OK] Claude Code instances terminated."
+  else
+    echo "  Please close them manually and run this script again."
+    exit 1
+  fi
+  echo ""
 fi
-echo ""
 
 # -----------------------------------------------------------------------------
 # Helper functions

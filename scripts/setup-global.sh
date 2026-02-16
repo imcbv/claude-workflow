@@ -128,6 +128,12 @@ else
   read -r
 fi
 
+# Check for updates
+echo "  Checking for Claude Code updates..."
+CURRENT_VERSION=$(claude --version 2>/dev/null || echo "unknown")
+echo "  Current version: $CURRENT_VERSION"
+npm outdated -g @anthropic-ai/claude-code 2>/dev/null && echo "  Update available! Run: npm update -g @anthropic-ai/claude-code" || ok "Claude Code is up to date"
+
 # -----------------------------------------------------------------------------
 # Step 4: LSP Dependencies
 # -----------------------------------------------------------------------------
@@ -198,23 +204,26 @@ done
 step "Step 6/6: Global MCPs"
 
 echo ""
-echo "  You should have these MCPs installed globally:"
-echo "    1. Context7 (library documentation)"
-echo "    2. Sentry (error tracking) - optional but recommended"
+echo "  Installing global MCPs (Context7 + Sentry)..."
 echo ""
 
+# Context7 MCP
+echo "  Installing Context7 MCP..."
 if claude mcp list 2>/dev/null | grep -q "context7"; then
   skip "Context7 MCP"
 else
-  echo "  To install Context7 MCP, run in Claude Code:"
-  echo "    claude mcp add --scope user context7 -- npx -y @anthropic-ai/context7-mcp"
-  echo ""
+  claude mcp add --scope user context7 -- npx -y @anthropic-ai/context7-mcp
+  ok "Context7 MCP installed"
 fi
 
-echo "  To install Sentry MCP (recommended), run:"
-echo "    claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp"
-echo "    Then authenticate: open Claude Code and run /mcp"
-echo ""
+# Sentry MCP
+echo "  Installing Sentry MCP..."
+if claude mcp list 2>/dev/null | grep -q "sentry"; then
+  skip "Sentry MCP"
+else
+  claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp
+  ok "Sentry MCP installed"
+fi
 
 # -----------------------------------------------------------------------------
 # Done
@@ -228,6 +237,11 @@ echo "  What was installed:"
 echo "    - tmux (parallel agents)"
 echo "    - TypeScript Language Server + Pyright (LSP)"
 echo "    - 12 Claude Code plugins (global)"
+echo "    - Context7 MCP (library documentation)"
+echo "    - Sentry MCP (error tracking)"
+echo ""
+echo "  Manual steps (do these yourself):"
+echo "    - [ ] Open Claude Code and run /mcp to authenticate Sentry (one-time OAuth)"
 echo ""
 echo "  Next steps:"
 echo "    1. Verify plugins: open Claude Code, run /plugin list"

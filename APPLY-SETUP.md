@@ -94,10 +94,10 @@ EOF
 **What happens:**
 1. ✅ Claude analyzes your repo (package.json, file structure, etc.)
 2. ✅ Detects stack (Next.js + FastAPI + PostgreSQL + Stripe, etc.)
-3. ✅ Recommends MCPs to install
-4. ✅ Recommends how many Sentry projects (detects monorepo)
+3. ✅ Installs local MCPs automatically (using current best practices from docs)
+4. ✅ Installs local plugins automatically
 5. ✅ Generates CLAUDE.md and settings.json
-6. ✅ Gives you copy-paste commands
+6. ✅ Generates TODO list for manual steps (account creation, API keys)
 
 ---
 
@@ -386,110 +386,43 @@ Each gets its own DSN in its own .env file.
 
 ---
 
-### Step 5: Setup Checklist
+### Step 5: What Gets Done Automatically vs Manual TODO
 
-**Claude generates a personalized checklist:**
+**Claude executes setup automatically, then gives you a TODO for what only you can do:**
 
 ```markdown
-## Setup Checklist for my-app
+## Automated Setup (Claude does this)
 
-### Phase 1: MCP Installation (5 min)
+✅ Installed local MCPs:
+  - PostgreSQL MCP (connected to DATABASE_URL from .env)
+  - Stripe MCP (connected to STRIPE_SECRET_KEY from .env)
+  - Vercel MCP (for frontend deployment)
+  - Render MCP (for backend deployment)
 
-- [ ] Install Sentry MCP:
-  ```bash
-  claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
-  claude
-  /mcp  # Authenticate with Sentry
-  ```
+✅ Installed local plugins:
+  - superpowers (production TDD enforcement)
 
-- [ ] Verify MCPs available:
-  ```bash
-  # Inside Claude Code
-  "List available MCPs"
-  # Should show: Context7, GitHub, PostgreSQL, Stripe, Sentry, Vercel, Render
-  ```
+✅ Generated .claude/CLAUDE.md with stack-specific rules
+✅ Generated .claude/settings.json with appropriate hooks
 
-### Phase 2: Sentry Setup (10 min)
+## Manual TODO (only you can do these)
 
-- [ ] Create Sentry projects:
-  1. Go to https://sentry.io
-  2. Create: my-app-frontend-prod (JavaScript/Next.js)
-  3. Copy DSN → frontend/.env.production as NEXT_PUBLIC_SENTRY_DSN
-  4. Create: my-app-backend-prod (Python/FastAPI)
-  5. Copy DSN → backend/.env as SENTRY_DSN
+- [ ] Create Sentry projects at sentry.io:
+      WHY: Claude needs Sentry DSNs to configure error tracking
+      DO: Create my-app-frontend-prod (Next.js) and my-app-backend-prod (FastAPI)
+      COME BACK WITH: The DSN values for each project
 
-- [ ] Install Sentry SDKs:
-  ```bash
-  # Frontend
-  cd frontend
-  npm install @sentry/nextjs
-  npx @sentry/wizard@latest -i nextjs
+- [ ] Open Claude Code and run /mcp to complete Sentry OAuth
+      WHY: Sentry MCP requires one-time browser authentication
 
-  # Backend
-  cd ../backend
-  pip install sentry-sdk[fastapi]
-  # Add to main.py (see MCP-MODULES/error-tracking.md)
-  ```
+- [ ] Commit the generated config:
+      git add .claude/
+      git commit -m "chore: Add Claude Code workflow setup"
 
-### Phase 3: Testing Framework (5 min)
+## Verify Setup
 
-- [ ] Install test frameworks:
-  ```bash
-  # Frontend
-  cd frontend
-  npm install -D vitest @testing-library/react @testing-library/jest-dom
-
-  # Backend
-  cd ../backend
-  pip install pytest pytest-asyncio httpx
-  ```
-
-### Phase 4: Apply Workflow (2 min)
-
-- [ ] Copy generated files:
-  ```bash
-  # CLAUDE.md already created above
-  # settings.json already created above
-
-  git add .claude/
-  git commit -m "chore: Add Claude Code workflow setup"
-  ```
-
-### Phase 5: Test Setup (3 min)
-
-- [ ] Test hooks:
-  ```bash
-  claude
-  # "What are the core rules for this project?"
-  # Should quote CLAUDE.md
-  ```
-
-- [ ] Test Sentry MCP:
-  ```bash
-  # Inside Claude Code
-  "List my Sentry projects"
-  # Should show: my-app-frontend-prod, my-app-backend-prod
-  ```
-
-- [ ] Trigger test error:
-  ```bash
-  # Follow instructions in MCP-MODULES/error-tracking.md
-  # Verify error appears in Sentry
-  # Ask Claude to analyze it
-  ```
-
-### Phase 6: Code Review Setup (5 min)
-
-- [ ] Choose and install:
-  - [ ] Greptile ($30/month, unlimited repos, GitLab support)
-    Go to https://greptile.com
-  - [ ] OR CodeRabbit (free tier, Claude Code integration)
-    ```bash
-    npm install -g @coderabbitai/cli
-    coderabbit login
-    ```
-
-**Total Time: ~30 minutes**
+- [ ] Test hooks: open Claude Code, ask "What are the core rules for this project?"
+- [ ] Test MCPs: open Claude Code, ask "List available MCPs"
 ```
 
 ---
@@ -703,17 +636,17 @@ cat ~/Documents/Code/claude-workflow/PROJECT-TEMPLATES/[your-stack].md
 ✅ Monorepo structure
 ✅ Number of Sentry projects needed
 
-### What Claude Recommends
+### What Claude Does Automatically
 
-✅ Which MCPs to install (per-project, local scope)
-✅ Which per-project plugins to install (based on questionnaire)
-✅ How many Sentry projects
-✅ Naming convention for Sentry projects
-✅ Which hooks to enable
-✅ CLAUDE.md configuration (including workflow rules for slash commands)
-✅ settings.json configuration
-✅ Step-by-step setup checklist
-✅ Cross-check with claude-code-setup plugin recommendations
+✅ Installs local MCPs automatically (per-project, local scope)
+✅ Installs per-project plugins automatically (based on questionnaire)
+✅ Verifies latest setup practices via Context7/web search before configuring each MCP
+✅ Detects how many Sentry projects needed + naming convention
+✅ Configures appropriate hooks
+✅ Generates CLAUDE.md (including workflow rules for slash commands)
+✅ Generates settings.json
+✅ Cross-checks with claude-code-setup plugin recommendations
+✅ Generates TODO list for manual steps (account creation, API keys, OAuth)
 
 ### What's Already Installed Globally (No Per-Project Action Needed)
 

@@ -103,6 +103,13 @@ PHASE 4 - Compare and identify changes:
    d. BREAKING CHANGES to address
    e. SECURITY updates needed
    f. Project-specific config that's outdated (if in a project)
+   g. DEPRECATED MCP CONFIGURATIONS: Check if any installed MCP configurations use
+      deprecated or legacy patterns. Use Context7 and/or web search to verify the
+      current recommended setup for each configured MCP. For example:
+      - Supabase: legacy anon JWT keys vs newer publishable keys (sb_publishable_...)
+      - Stripe: outdated API versions or deprecated endpoints
+      - Any MCP using deprecated transport or authentication methods
+      Recommend updating to current best practices for each service.
 
 5. For each finding, provide:
    - What changed
@@ -127,6 +134,13 @@ IMPORTANT:
 - Don't suggest changes just for the sake of changing things
 - Prioritize security and breaking changes over nice-to-haves
 - Always compare your findings with the claude-code-setup plugin's assessment"
+
+# Check Claude Code version
+echo ""
+echo "  Checking Claude Code version..."
+CURRENT_VERSION=$(claude --version 2>/dev/null || echo "unknown")
+echo "  Current: $CURRENT_VERSION"
+npm outdated -g @anthropic-ai/claude-code 2>/dev/null && echo "  Update available! Run: npm update -g @anthropic-ai/claude-code" || echo "  Claude Code is up to date."
 
 echo ""
 echo "  Launching Claude Code to check for updates..."

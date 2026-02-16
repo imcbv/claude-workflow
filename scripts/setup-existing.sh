@@ -87,6 +87,8 @@ echo "--- Analyzing project with Claude Code ---"
 echo ""
 
 PROMPT="You are setting up Claude Code for an EXISTING project. The code already exists.
+Your job is to EXECUTE the setup — install MCPs, install plugins, create config files.
+Only leave things for the user that genuinely require human action (account creation, API keys).
 
 PROJECT DETAILS:
 - Name: $PROJECT_NAME
@@ -137,22 +139,44 @@ PHASE 4 - Compare and merge:
    - If the plugin suggests something you missed, include it
    - If you recommend something the plugin didn't catch, include it
 
-PHASE 5 - Generate:
-7. Based on the merged recommendations, GENERATE:
+PHASE 5 - Execute setup:
+7. Based on the merged recommendations, GENERATE these files:
    a. .claude/CLAUDE.md - Project-specific rules based on detected stack
    b. .claude/settings.json - Hooks appropriate for this stack
    (If existing config: merge, don't overwrite custom rules)
-8. LIST which LOCAL MCPs to install (with exact commands)
-9. LIST which LOCAL plugins to install (with exact commands)
-   - If production: recommend superpowers plugin
-   - If optional tools selected: recommend those plugins
-10. PROVIDE a complete summary with copy-paste commands
+
+8. INSTALL local MCPs by running \`claude mcp add\` commands via the Bash tool.
+   - Use LOCAL scope (the default — do NOT use --scope user)
+   - Each project gets its own MCP instances — never install project-specific MCPs globally
+   - Before configuring any MCP, use Context7 and/or web search to verify the CURRENT
+     recommended setup. For example, Supabase now recommends publishable keys
+     (sb_publishable_...) over legacy anon JWT keys for new apps. Always use what the
+     official docs currently recommend — never hardcode legacy patterns.
+   - For MCPs that need API keys or credentials found in .env, use those values
+   - For MCPs that need API keys NOT found in .env, skip and add to TODO (Phase 6)
+
+9. INSTALL local plugins by running the appropriate install commands.
+   - If production: install superpowers plugin
+   - If optional tools selected: install those plugins
+   - Only install per-project plugins — global plugins are already installed
+
+PHASE 6 - Generate MANUAL TODO:
+10. After completing all automated setup, output a MANUAL TODO checklist of steps
+    only the user can do. For each item, explain WHY they need to do it and WHAT
+    to come back with. Examples:
+    - 'Create Supabase account at supabase.com' (if no SUPABASE_URL in .env)
+    - 'Get Stripe API keys from dashboard.stripe.com/apikeys' (if Stripe detected but no key in .env)
+    - 'Open Claude Code and run /mcp to complete Sentry OAuth'
+    - 'Create Sentry project at sentry.io for [app-name]'
+    If the user already has accounts/keys (detected in .env), skip those TODOs.
+    If there are NO manual steps needed, say 'All set! No manual steps required.'
 
 IMPORTANT:
 - Global plugins are ALREADY installed (security-guidance, typescript-lsp, pyright-lsp,
   frontend-design, code-review, commit-commands, feature-dev, pr-review-toolkit,
   claude-md-management, playwright, claude-code-setup, coderabbit)
-- Only recommend LOCAL/per-project items
+- Global MCPs are ALREADY installed (Context7, Sentry)
+- Only install LOCAL/per-project items
 - Include workflow rules in CLAUDE.md:
   * Before committing: use /commit
   * Before PRs: run /pr-review-toolkit:review-pr all

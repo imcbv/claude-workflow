@@ -17,6 +17,20 @@ echo "=================================================="
 echo ""
 
 # -----------------------------------------------------------------------------
+# Pre-flight: close running Claude Code instances
+# -----------------------------------------------------------------------------
+echo "  IMPORTANT: Close all running Claude Code instances before continuing."
+echo "  This script installs global MCPs and plugins, which can conflict"
+echo "  with running sessions."
+echo ""
+read -p "  Have you closed all Claude Code instances? [y/n]: " CLOSED
+if [ "$CLOSED" != "y" ]; then
+  echo "  Please close all Claude Code instances and run this script again."
+  exit 1
+fi
+echo ""
+
+# -----------------------------------------------------------------------------
 # Helper functions
 # -----------------------------------------------------------------------------
 check_installed() {

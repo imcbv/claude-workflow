@@ -160,7 +160,7 @@ vim PROJECT-TEMPLATES/fullstack-web.md
 Apply updates to a test project:
 
 ```bash
-# Pick one of your 20+ projects
+# Pick one of your projects to test on
 cd ~/projects/test-project
 
 # Apply updated setup
@@ -210,7 +210,7 @@ If you made significant discoveries:
    ```markdown
    Title: "Workflow Update (Mar 2026): New /insights feature, worktrees setup, TDD changes"
 
-   I maintain a public workflow repo for indie hackers managing 20+ projects.
+   I maintain a public workflow repo for indie hackers managing multiple projects.
    Here's what changed this month based on /last30days research:
 
    - [Key finding 1]

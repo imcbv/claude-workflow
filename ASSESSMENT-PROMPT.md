@@ -76,7 +76,7 @@ Based on the project type and gaps, recommend:
    ```
    Example:
    - Set up Greptile for code review (unlimited repos)
-   - Configure Stripe MCP (you use payments)
+   - Configure Stripe MCP (if project uses payments)
    - Create worktrees for parallel work on features X and Y
    ```
 
@@ -209,13 +209,13 @@ Total Estimated Time: [X hours]
 
 ### THIS WEEK (2-3 hours)
 1. Install Greptile ($30/month for unlimited repos)
-   - You have 20+ repos, this makes sense
+   - Unlimited repos included
    - Catches 3x more bugs than alternatives
 
 2. Add MCPs:
-   - Stripe (you use payments heavily)
-   - PostgreSQL (your database)
-   - Vercel (your deployment platform)
+   - Stripe (if project handles payments)
+   - PostgreSQL (if project uses PostgreSQL)
+   - Vercel (if deploying to Vercel)
 
 3. Write tests for payment flows (CRITICAL - 0% coverage now)
    - Stripe webhook handling

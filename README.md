@@ -1,123 +1,151 @@
-# Claude Code Workflow for Indie Hackers
-> **Last Updated:** 2026-02-11
-> **Next Review:** 2026-03-13 (30 days)
-> **Research Method:** `/last30days` skill across Reddit, X, Web
+# Claude Code Setup Tool
 
-A comprehensive, modular Claude Code setup for solo builders managing 20+ projects across multiple tech stacks.
+Set up the perfect Claude Code configuration for any project. One-time global install, then per-project setup in minutes.
 
----
+## How It Works
 
-## 📋 Quick Start
+**4 commands. That's it.**
 
-**For NEW projects:**
+### 1. First Time? Global Setup
+
+Run this once on your machine. Installs everything: Claude Code, tmux (parallel agents), LSP servers, 12 global plugins.
+
 ```bash
-# Feed this entire repo to Claude Code when starting a new project
-cat CORE-SETUP.md PROJECT-TEMPLATES/<your-stack>.md | claude
+git clone https://github.com/imcbv/claude-workflow.git ~/Documents/Code/claude-workflow
+cd ~/Documents/Code/claude-workflow
+./scripts/setup-global.sh
 ```
 
-**For EXISTING projects:**
+**What it installs:**
+- tmux (run multiple Claude agents side by side)
+- TypeScript + Python language servers (real-time type checking)
+- 12 plugins: security scanning, code review, commit automation, UI design, PR review, and more
+
+Takes ~15 minutes. Never needs to run again.
+
+### 2. New Project
+
+Run this when starting a new project. Asks a few questions, then Claude generates all config files.
+
 ```bash
-# Claude will assess your setup and suggest changes
-cat CORE-SETUP.md ASSESSMENT-PROMPT.md | claude
+cd ~/projects/my-new-app
+~/Documents/Code/claude-workflow/scripts/setup-new.sh
 ```
 
----
+**What it does:**
+- Asks: production or MVP? What stack? What services?
+- Generates `.claude/CLAUDE.md` (project rules)
+- Generates `.claude/settings.json` (auto-test, auto-format hooks)
+- Lists which MCPs and plugins to install locally
+- Takes ~5 minutes
 
-## 📂 Repository Structure
+### 3. Existing Project
 
-```
-claude-workflow/
-├── README.md                    # This file
-├── CORE-SETUP.md                # Universal setup (all projects)
-├── TESTING-GUIDE.md             # TDD workflows & when to use
-├── GIT-WORKFLOW.md              # Worktrees, parallel agents, commits
-├── CODE-REVIEW.md               # CodeRabbit & Greptile setup
-├── ASSESSMENT-PROMPT.md         # Feed to Claude for existing projects
-├── UPDATE-WORKFLOW.md           # How to update this repo every 30 days
-├── PROJECT-TEMPLATES/
-│   ├── fullstack-web.md         # React/Next.js + Node/Django + DB
-│   ├── backend-api.md           # FastAPI/Node/Django + DB
-│   ├── mobile.md                # React Native / Capacitor
-│   └── mvp-prototype.md         # Fast iteration, lighter setup
-├── MCP-MODULES/
-│   ├── databases.md             # PostgreSQL, MongoDB, Supabase
-│   ├── payments.md              # Stripe MCP
-│   ├── deployment.md            # Vercel, Render, Fly.io, AWS
-│   └── redis.md                 # Redis MCP
-└── HOOKS/
-    ├── auto-test.json           # Automatically run tests
-    ├── auto-format.json         # Format code on save
-    └── skill-loader.json        # Force skill loading
+Run this in a project that already has code. Claude analyzes the codebase and sets up what's missing.
+
+```bash
+cd ~/projects/my-existing-app
+~/Documents/Code/claude-workflow/scripts/setup-existing.sh
 ```
 
----
+**What it does:**
+- Scans your code (package.json, requirements.txt, file structure, .env files)
+- Detects stack, database, deployment, payments, monorepo structure
+- Shows what it found, asks you to confirm
+- Generates config files for what's missing
+- Takes ~5 minutes
 
-## 🎯 Philosophy
+### 4. Monthly Update
 
-1. **Modular** - Mix and match components per project
-2. **Automated** - Don't remind Claude, hooks do it
-3. **Consistent** - Same patterns across all 20+ projects
-4. **Updated** - Review every 30 days with `/last30days`
-5. **Evidence-based** - All recommendations from recent research (Reddit, X, Web)
+Run this every 30 days (or whenever). Checks if your setup needs updating.
 
----
+```bash
+~/Documents/Code/claude-workflow/scripts/update.sh
+```
 
-## 🚀 What's Inside
-
-### Core Setup (Always)
-- Context7 MCP (up-to-date library docs)
-- GitHub MCP (repo management)
-- File System MCP (refactoring control)
-- `/insights` skill (auto-generates custom skills)
-- CLAUDE.md template
-- Hooks for automatic testing, skill loading
-
-### Testing (Project-Dependent)
-- **MVPs/Prototypes:** Minimal testing, focus on speed
-- **Production apps:** Full TDD with hooks
-- **Technical debt calculator** (when to skip tests)
-
-### Git Workflow
-- Parallel worktrees from terminal (3-5 agents)
-- tmux integration
-- Commit-per-task-step pattern
-- Plan mode → /clear → implement
-
-### Code Review
-- **CodeRabbit** (Claude Code plugin, fast feedback)
-- **Greptile** (catches 3x more bugs, full codebase context, GitLab support)
-
-### MCP Modules (Add as Needed)
-- Stripe (payments)
-- PostgreSQL / MongoDB / Supabase (databases)
-- Vercel / Render / Fly.io / AWS Beanstalk (deployment)
-- Redis (caching)
+**What it does:**
+- Researches latest Claude Code best practices
+- Checks for new plugins, deprecated tools, breaking changes
+- Compares with your current setup
+- Suggests specific updates (or tells you you're good)
 
 ---
 
-## 📅 Maintenance Schedule
+## What You Get After Setup
 
-**Every 30 days:**
-1. Run `/last30days recommended claude code setup indie hacker 2026`
-2. Review suggested changes
-3. Update relevant docs
-4. Commit with date: `git commit -m "Update: 2026-03-13 workflow review"`
+Once set up, this is what happens automatically when you use Claude Code:
 
-See `UPDATE-WORKFLOW.md` for detailed instructions.
-
----
-
-## 🤝 Community
-
-This setup is public and battle-tested across 20+ production projects. PRs welcome!
-
-**Research sources:**
-- Reddit: r/ClaudeCode, r/ClaudeAI (750+ upvotes analyzed)
-- X: 75+ posts from top voices (@cptn3mox, @dani_avila7, @kellypeilinchan)
-- Web: 30+ guides from Builder.io, QuantumByte, Apidog, Greptile, CodeRabbit
+| What | How It Works | You Do... |
+|------|-------------|-----------|
+| Security scanning | Plugin scans every code edit for XSS, injection, etc. | Nothing. Automatic. |
+| Type checking | LSP catches type errors in real-time | Nothing. Automatic. |
+| UI quality | Design skills activate when Claude does UI work | Nothing. Automatic. |
+| Committing | Claude uses `/commit` or `/commit-push-pr` | Just say "commit this" |
+| New features | Claude uses 7-phase structured workflow | Just say "build X feature" |
+| Code review | 6 agents review before PR | Just say "review this" |
+| Session memory | CLAUDE.md updated with learnings | Happens at session end |
+| Tests | Auto-run after every code edit (production projects) | Nothing. Automatic. |
 
 ---
 
-**Created:** 2026-02-11
+## Parallel Agents (Worktrees)
+
+Work on multiple features at the same time with separate Claude agents:
+
+```bash
+cd ~/projects/my-app
+
+# Create separate workspaces
+git worktree add ../my-app-feature feature/auth
+git worktree add ../my-app-bugfix fix/payments
+
+# Open tmux, split into panes, run Claude in each
+tmux
+# Pane 1: cd ~/projects/my-app && claude
+# Pane 2: cd ~/projects/my-app-feature && claude
+# Pane 3: cd ~/projects/my-app-bugfix && claude
+
+# 3 agents, 3 branches, no conflicts.
+# /clean_gone cleans up when done.
+```
+
+See [GIT-WORKFLOW.md](GIT-WORKFLOW.md) for the full guide with tmux cheatsheet.
+
+---
+
+## Detailed Documentation
+
+The scripts handle everything, but if you want to understand the details:
+
+| Doc | What's In It |
+|-----|-------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Plugins vs MCPs vs Skills, what's global vs local, complete plugin list |
+| [CORE-SETUP.md](CORE-SETUP.md) | Essential MCPs, CLAUDE.md template, hooks |
+| [TESTING-GUIDE.md](TESTING-GUIDE.md) | When to test, TDD workflow, framework setup |
+| [GIT-WORKFLOW.md](GIT-WORKFLOW.md) | Worktrees, tmux, parallel agents, commit patterns |
+| [CODE-REVIEW.md](CODE-REVIEW.md) | CodeRabbit + Greptile setup |
+| [APPLY-SETUP.md](APPLY-SETUP.md) | Detailed project setup workflow (used by scripts) |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Plugin analysis: what to install, what to skip, why |
+| [UPDATE-WORKFLOW.md](UPDATE-WORKFLOW.md) | Monthly update process, research methodology |
+
+### Reference Files
+
+| Dir | Contents |
+|-----|---------|
+| [PROJECT-TEMPLATES/](PROJECT-TEMPLATES/) | Stack-specific configs (fullstack, backend, mobile, MVP) |
+| [MCP-MODULES/](MCP-MODULES/) | Setup guides for databases, payments, deployment, error tracking |
+| [HOOKS/](HOOKS/) | Hook templates (auto-test, auto-format, skill-loader) |
+
+---
+
+## Philosophy
+
+1. **Automated** - Hooks and plugins do the work, not reminders
+2. **Modular** - Global base + per-project additions
+3. **Simple** - 4 commands cover everything
+4. **Updated** - Monthly review keeps it current
+5. **Evidence-based** - All recommendations from community research
+
+---
+
 **License:** MIT
-**Author:** Indie hacker managing 20+ projects (React, Next.js, Django, Node, Deno, FastAPI, React Native, Capacitor, Supabase, MongoDB, PostgreSQL, Stripe, Vercel, Render, Fly.io, AWS, Redis)

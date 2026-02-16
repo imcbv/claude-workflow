@@ -53,10 +53,10 @@ Example: "MyStartup" or "JohnDoe"
 - **Team ($26/month):** 50K errors/month, unlimited projects
 - **Business ($80/month):** 100K errors/month, performance monitoring
 
-**Recommendation for indie hackers with 20+ projects:**
+**Recommendation for indie hackers with many projects:**
 - Start with **Team plan** ($26/month)
-- Unlimited projects (perfect for your setup)
-- Can track errors across all your apps
+- Unlimited projects
+- Can track errors across all apps
 
 ### If You ALREADY Have Sentry
 
@@ -208,7 +208,7 @@ claude
 # - etc.
 ```
 
-**One-time setup:** Once authenticated, works across all your projects!
+**One-time setup:** Once authenticated, works across all projects!
 
 ---
 

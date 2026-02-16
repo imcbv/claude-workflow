@@ -1,6 +1,6 @@
 # Stripe MCP
 
-**When:** Using Stripe for payments (you use it a lot!)
+**When:** Using Stripe for payments
 
 **Setup:**
 

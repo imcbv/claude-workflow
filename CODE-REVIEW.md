@@ -137,7 +137,7 @@ Add to `.claude/settings.json`:
    - **Cloud Plan:** $30/month, unlimited repos
    - **Enterprise:** Custom pricing, self-hosted
 
-**For you:** Cloud Plan (unlimited repos, both GitHub AND GitLab)
+**Recommended for most indie hackers:** Cloud Plan (unlimited repos, supports both GitHub AND GitLab)
 
 **Source:** [Greptile pricing](https://www.greptile.com/docs/integrations/github-gitlab-integration) - "Hosted subscription billed per active developer per month, includes unlimited repositories and reviews"
 
@@ -253,7 +253,7 @@ Auto-approve:
 - ✅ Need maximum bug detection (82% vs CodeRabbit's 44%)
 - ✅ Complex changes affecting multiple parts of codebase
 - ✅ GitLab repos (Greptile supports, CodeRabbit doesn't)
-- ✅ Unlimited repos (you have 20+)
+- ✅ Unlimited repos (great if you manage many)
 
 **Workflow:**
 ```bash
@@ -469,13 +469,13 @@ Then use a hook:
 | Maximum safety (payments, health, finance) | Both (CodeRabbit + Greptile) |
 | Budget-conscious | DIY with Claude Code reviewer agent |
 
-**Your recommendation:** Greptile ($30/month)
-- Unlimited repos (you have 20+)
-- GitLab support (some of your repos)
+**If you manage many repos across GitHub + GitLab:** Greptile ($30/month)
+- Unlimited repos
+- GitLab support
 - Catches 3x more bugs
 - Full codebase context
 
-Add CodeRabbit if you want Claude Code integration for solo work.
+Add CodeRabbit if you want Claude Code integration for local review before push.
 
 ---
 

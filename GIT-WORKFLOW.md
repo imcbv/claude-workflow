@@ -340,10 +340,10 @@ Tool that prevents Claude Code sessions from dying when you close the terminal.
 
 ---
 
-## Team Workflow (For Your Non-Technical Team Members)
+## Team Workflow (With Non-Technical Team Members)
 
-**Your setup:**
-- You: Terminal + worktrees + parallel agents
+**Typical setup:**
+- Developer: Terminal + worktrees + parallel agents
 - Non-technical: Lovable (vibe-code) connected to GitHub
 
 **How it works together:**
@@ -375,7 +375,7 @@ Tool that prevents Claude Code sessions from dying when you close the terminal.
    gh pr comment 123 --body "Please fix the auth logic"
    ```
 
-**Source:** Your context - "solo or small teams, some non-technical using Lovable connected to GitHub"
+**Works well for:** Solo devs or small teams, including non-technical members using tools like Lovable connected to GitHub
 
 ---
 

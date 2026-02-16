@@ -40,7 +40,7 @@
 - View logs and metrics
 - Update environment variables
 
-**Built-in:** Check your tool list for `mcp__render__*` tools (you have this!)
+**Built-in:** Check your tool list for `mcp__render__*` tools (may already be available)
 
 **Use cases:**
 ```bash
@@ -51,22 +51,22 @@
 "Add environment variable DATABASE_URL"
 ```
 
-**For your projects:**
-- One big AWS Beanstalk project → Consider migrating to Render (easier MCP integration)
-- Other projects → Render is great for APIs, cron jobs, databases
+**Tips:**
+- If you have AWS Beanstalk projects, consider migrating to Render (easier MCP integration)
+- Render is great for APIs, cron jobs, and databases
 
 ---
 
 ## Fly.io MCP
 
-**When:** Deploying to Fly.io (you use this)
+**When:** Deploying to Fly.io
 
 **Features:**
 - Deploy apps
 - View status and logs
 - Manage machines
 
-**Built-in:** Check your tool list for `mcp__flymcp__*` tools (you have this!)
+**Built-in:** Check your tool list for `mcp__flymcp__*` tools (may already be available)
 
 **Use cases:**
 ```bash
@@ -75,6 +75,33 @@
 "Check Fly.io app status"
 "Get logs for my Fly.io machine"
 ```
+
+---
+
+## Railway
+
+**When:** Deploying backends, full-stack apps, or databases to Railway
+
+**Features:**
+- Deploy from Git repo
+- Auto-detect runtime (Node, Python, Go, etc.)
+- Managed PostgreSQL, Redis
+- Environment variable management
+
+**MCP Status:** No official MCP found
+
+**Recommendation:**
+- Use Railway CLI via Bash tool
+
+**If using Railway:**
+```bash
+# From Claude Code, use Bash tool
+railway up
+railway logs
+railway variables set KEY=value
+```
+
+**Detection:** Look for `railway.toml` or `Procfile` in project root
 
 ---
 
@@ -120,6 +147,7 @@ r.set('key', 'value')
 | **Vercel** | ✅ Official | Next.js, frontends | Some projects |
 | **Render** | ✅ Official | APIs, databases, full-stack | Some projects |
 | **Fly.io** | ✅ Available | Low-latency apps, global | Some projects |
+| **Railway** | ❌ None (use CLI) | Backends, full-stack, managed DBs | Some projects |
 | **AWS Beanstalk** | ❌ None | Enterprise, one big project | One project |
 
 **Recommendation:** Use Render MCP and Fly.io MCP for new projects. They have excellent Claude Code integration.

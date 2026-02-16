@@ -12,7 +12,7 @@
 - Database-backed (PostgreSQL, MongoDB, or Supabase)
 - Deploying to Vercel, Render, or similar
 
-**Examples from your projects:**
+**Common use cases:**
 - SaaS apps with dashboards
 - E-commerce platforms
 - Social platforms
@@ -212,6 +212,7 @@ Install these MCPs for full-stack web development:
 - MongoDB MCP (if using MongoDB)
 - Vercel MCP (if deploying to Vercel)
 - Render MCP (if deploying to Render)
+- Railway CLI (if deploying to Railway — no MCP, use Bash tool)
 ```
 
 See `MCP-MODULES/` for detailed setup.

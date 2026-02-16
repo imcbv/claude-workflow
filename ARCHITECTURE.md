@@ -129,7 +129,7 @@ claude mcp add --scope project --transport http sentry https://mcp.sentry.dev/mc
 ### GLOBAL (Install Once, Forget Forever)
 
 These are tools that:
-- ✅ Work the same across ALL your 20+ projects
+- ✅ Work the same across ALL projects
 - ✅ Don't have project-specific accounts/keys
 - ✅ You ALWAYS want available
 
@@ -184,8 +184,10 @@ claude mcp add postgres [url]
 # Connects to my-app's database
 ```
 
-**Your Supabase Problem:**
-> "Imagine I installed Supabase MCP globally but use different accounts for different projects"
+**Common Problem: Multi-Account Supabase**
+
+If you install Supabase MCP globally but use different accounts for different projects,
+the global config will always point to the same account.
 
 **Solution:** Install Supabase MCP at LOCAL scope (default) per project:
 
@@ -223,52 +225,159 @@ claude mcp add --scope user vercel [url]
 
 ---
 
-## 🔌 Plugins You Should Install
+## 🔌 Complete Plugin Guide
 
-### Official Plugins (from `/plugin` list)
+### How Plugins Trigger (Do I Need to Remember?)
 
-**Install these GLOBALLY** (they work across all projects):
+| Trigger Type | How It Works | Example Plugins |
+|-------------|-------------|-----------------|
+| **AUTOMATIC** | Hook fires on events. Zero effort. | security-guidance, skill-loader |
+| **SKILLS (auto)** | Claude sees skills and uses them when relevant. | frontend-design, code-review |
+| **SLASH COMMANDS** | You invoke manually (or Claude suggests). | /commit, /feature-dev, /revise-claude-md |
+| **LSP (background)** | Language server runs silently. | typescript-lsp, pyright-lsp |
+
+**For slash commands**, add these rules to CLAUDE.md so Claude follows them automatically:
+```markdown
+## Workflow Rules
+- Before committing: use /commit (commit-commands plugin)
+- Before PRs: run /pr-review-toolkit:review-pr all
+- End of session: run /revise-claude-md
+- New features: use /feature-dev for non-trivial features
+```
+
+---
+
+### GLOBAL Plugins (Install Once, All Projects)
 
 ```bash
-# 1. Frontend Design - Auto-invoked for frontend work
-/plugin install frontend-design@claude-code-plugin
+# === AUTOMATIC (zero effort) ===
 
-# What it does:
-# - Activated automatically when Claude works on UI
-# - Provides design guidance: typography, spacing, colors
-# - Makes UI look professional (not generic AI-generated)
-# - THIS is the "frontend skill" you were asking about!
+# 1. Security Guidance - Scans code as Claude writes it
+/plugin install security-guidance
+# Catches: XSS, command injection, eval(), pickle, hardcoded secrets
+# PreToolUse hook → fires before every Write/Edit → non-blocking warnings
+# Covers: React, Django, FastAPI, Node, GitHub Actions
 
-# 2. Code Review - 5 parallel review agents
-/plugin install code-review@claude-code-plugin
+# 2. TypeScript LSP - Real-time type checking
+/plugin install typescript-lsp
+# Claude sees type errors instantly after every edit
+# 900x faster code navigation than grep
+# Requires: npm install -g typescript-language-server typescript
 
-# What it does:
-# - /code-review command
-# - 5 parallel Sonnet agents check:
-#   1. CLAUDE.md compliance
-#   2. Bug detection
-#   3. Historical context
-#   4. PR history analysis
-#   5. Code comments quality
-# - Works alongside CodeRabbit/Greptile (complementary!)
+# 3. Pyright LSP - Python type checking
+/plugin install pyright-lsp
+# Catches type bugs in Django/FastAPI that Claude would miss
+# Requires: pip install pyright
 
-# 3. Webapp Testing - Playwright browser testing
-/plugin install webapp-testing@claude-code-plugin
+# === SKILLS (auto-invoked when relevant) ===
 
-# What it does:
-# - Claude can open a browser and TEST your UI
-# - Verifies visual output, clicks buttons, fills forms
-# - Catches visual bugs, broken flows, responsive issues
-# - Auto-invoked when Claude mentions testing a web page
+# 4. Frontend Design - Professional UI generation
+/plugin install frontend-design
+# Auto-activated when Claude works on UI code
+# Bold design choices, proper typography, spacing, colors, animations
 
-# 4. CodeRabbit (if you use CodeRabbit)
-/plugin install coderabbit@claude-code-plugin
+# 5. Code Review - 5 parallel review agents
+/plugin install code-review
+# Auto-used during review tasks. CLAUDE.md compliance, bug detection,
+# historical context, PR history, code comments quality
+# Complements CodeRabbit/Greptile (local review vs GitHub review)
 
-# What it does:
-# - /coderabbit:review command
-# - Bundles: CodeRabbit MCP + skill + hook
-# - Don't need separate CodeRabbit MCP if you have this plugin
+# === SLASH COMMANDS (Claude suggests when appropriate) ===
+
+# 6. Commit Commands - Git workflow
+/plugin install commit-commands
+# /commit - Conventional Commit from staged diff
+# /commit-push-pr - Branch + commit + push + PR in one shot
+# /clean_gone - Remove stale local branches
+
+# 7. Feature Dev - Structured 7-phase feature development
+/plugin install feature-dev
+# /feature-dev - 3 subagents: code-explorer, code-architect, code-reviewer
+# Discovery → Exploration → Questions → Design → Implement → Review → Summary
+# Overkill for small fixes, perfect for new features
+
+# 8. PR Review Toolkit - 6 specialized review agents
+/plugin install pr-review-toolkit
+# /pr-review-toolkit:review-pr all
+# Agents: comment-analyzer, test-coverage, silent-failure-hunter,
+#         type-design, code-reviewer, code-simplifier
+# You're your own reviewer - this gives you six.
+
+# 9. Claude MD Management - Keep CLAUDE.md current
+/plugin install claude-md-management
+# /revise-claude-md - Captures session learnings, proposes CLAUDE.md updates
+# Run at end of productive sessions
+
+# 10. CodeRabbit (if you use CodeRabbit)
+/plugin install coderabbit
+# /coderabbit:review - Bundles MCP + skill + hook
+
+# 11. Playwright - Browser testing
+/plugin install playwright
+# Claude opens a browser and tests your UI
+# Clicks buttons, fills forms, catches visual bugs
 ```
+
+### PER-PROJECT Plugins (Install Locally When Needed)
+
+These get installed **only on projects that need them**. The project questionnaire
+(see APPLY-SETUP.md) determines which ones to install.
+
+```bash
+# TDD Enforcement (production projects only)
+/plugin install superpowers
+# 20+ skills enforcing TDD, YAGNI, planning, subagent-driven dev
+# ⚠️ Opinionated: deletes code written before tests
+# ⚠️ DO NOT install on MVPs/prototypes - it fights rapid iteration
+# WHEN TO USE: Production apps where test coverage matters
+# Install per-project, not globally
+
+# Greptile (if using for code review)
+/plugin install greptile
+```
+
+### QUESTIONNAIRE Plugins (Ask Before Installing)
+
+These plugins are useful but only for specific tools/services. The project
+assessment (APPLY-SETUP.md) asks about these:
+
+| Question | If Yes → Install |
+|----------|-----------------|
+| "Will you use Figma designs?" | `figma` plugin (design-to-code) |
+| "Need web scraping/research?" | `firecrawl` plugin (web crawling) |
+| "Collaborate via Slack?" | `slack` plugin (trigger Claude from Slack) |
+| "Does this project use GitLab?" | `gitlab` plugin (locally) |
+| "Does this project use Firebase?" | `firebase` plugin (locally) |
+| "Does this project use Pinecone?" | `pinecone` plugin (locally) |
+| "Is this a PHP/Laravel project?" | `laravel-boost` + `php-lsp` (locally) |
+| "Do you use PostHog analytics?" | `posthog` plugin (locally) |
+| "Do you use Notion for specs?" | `Notion` plugin (locally) |
+| "Does this project use Docker?" | Docker detection + container workflow |
+
+### SKIP These Plugins
+
+| Plugin | Why Skip |
+|--------|---------|
+| context7 plugin | You already have Context7 as MCP. Plugin just wraps same MCP. |
+| github plugin | `gh` CLI works fine. Plugin adds MCP wrapper with no real gain. |
+| explanatory-output-style | Adds token cost every session explaining things you know. |
+| learning-output-style | Asks YOU to write code. Designed to slow you down. |
+| agent-sdk-dev | Only for building Claude Agent SDK apps. |
+| plugin-dev | Only for building Claude Code plugins. |
+| playground | Niche visual config tool. Marginal utility. |
+| hookify | Claude already writes hooks for you when asked. Buggy. |
+| code-simplifier | Token cost (pay twice). Bug modifies string literals. |
+| serena | Overlaps with typescript-lsp + pyright-lsp. Connection issues. |
+| ralph-loop | Autonomous loops. Token burn risk. Hard to control. |
+| atlassian | Solo dev, not using Jira/Confluence. |
+| linear | Solo dev, not using Linear. |
+| asana | Solo dev, not using Asana. |
+| circleback | Meeting notes. Solo dev. |
+| huggingface-skills | ML/LLM training. Not your use case. |
+| sonatype-guide | Low adoption. npm audit/Dependabot sufficient. |
+| All irrelevant LSPs | gopls, csharp, rust-analyzer, jdtls, clangd, kotlin, lua, swift |
+
+---
 
 ### Plugin vs MCP: When Both Exist
 
@@ -280,6 +389,9 @@ claude mcp add --scope user vercel [url]
 | **Just CodeRabbit Plugin** | MCP + skill + /coderabbit:review command + hook |
 
 **Rule:** If a **plugin** exists, use the plugin (it includes the MCP + more).
+
+**Exception: Context7 and GitHub** - You already have working MCPs for these.
+The plugins would just wrap the same MCPs. No reason to switch.
 
 **Example: Vercel**
 
@@ -306,11 +418,20 @@ claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp
 
 **Plugins (global):**
 ```bash
-# These enhance Claude's capabilities everywhere
-/plugin install frontend-design@claude-code-plugin
-/plugin install code-review@claude-code-plugin
-/plugin install webapp-testing@claude-code-plugin
-/plugin install coderabbit@claude-code-plugin  # if using CodeRabbit
+# Phase 1: Immediate (zero-config, auto-trigger)
+/plugin install security-guidance
+/plugin install typescript-lsp    # requires: npm i -g typescript-language-server typescript
+/plugin install pyright-lsp       # requires: pip install pyright
+
+# Phase 2: Skills + Commands
+/plugin install frontend-design
+/plugin install code-review
+/plugin install commit-commands
+/plugin install feature-dev
+/plugin install pr-review-toolkit
+/plugin install claude-md-management
+/plugin install playwright
+/plugin install coderabbit         # if using CodeRabbit
 ```
 
 **Skills (global, in ~/.claude/skills/):**
@@ -351,6 +472,29 @@ claude mcp add render [url]       # Project's Render service
 claude mcp add flyio [url]        # Project's Fly.io app
 ```
 
+**Conditional plugins (based on project questionnaire):**
+```bash
+# Only install if project needs TDD enforcement:
+/plugin install superpowers
+
+# Only install if project-specific service:
+/plugin install figma         # If using Figma designs
+/plugin install firecrawl     # If need web scraping
+/plugin install firebase      # If project uses Firebase
+/plugin install gitlab        # If project uses GitLab
+/plugin install pinecone      # If project uses vector DB
+/plugin install slack         # If collaborating via Slack
+```
+
+**Also run claude-code-setup for recommendations:**
+```bash
+# This plugin analyzes your project and suggests MCPs, skills, hooks
+# Run it ONCE per project as a second opinion alongside APPLY-SETUP.md
+# It's read-only (never modifies files)
+/plugin install claude-code-setup   # install globally once
+# Then in your project, Claude auto-suggests based on detected stack
+```
+
 **Project CLAUDE.md:**
 ```bash
 # Every project gets its own .claude/CLAUDE.md
@@ -380,69 +524,137 @@ claude mcp add flyio [url]        # Project's Fly.io app
 ### Step 3: Summary Table
 
 ```
-┌─────────────────────┬────────┬─────────┬──────────────────────┐
-│ Component           │ Scope  │ Install │ Reason               │
-├─────────────────────┼────────┼─────────┼──────────────────────┤
-│ GLOBAL (install once, forget)                                 │
-├─────────────────────┼────────┼─────────┼──────────────────────┤
-│ Context7 MCP        │ user   │ once    │ No account needed    │
-│ GitHub MCP          │ user   │ once    │ One GitHub account   │
-│ Sentry MCP          │ user   │ once    │ One Sentry, all proj │
-│ frontend-design     │ plugin │ once    │ Always useful        │
-│ code-review         │ plugin │ once    │ Always useful        │
-│ webapp-testing      │ plugin │ once    │ Always useful        │
-│ coderabbit          │ plugin │ once    │ Always useful        │
-│ Skills in ~/        │ global │ once    │ Your personal skills │
-│ skill-loader hook   │ global │ once    │ Fix current bug      │
-├─────────────────────┼────────┼─────────┼──────────────────────┤
-│ PER-PROJECT (install per project)                             │
-├─────────────────────┼────────┼─────────┼──────────────────────┤
-│ Supabase MCP        │ local  │ each    │ Different accounts!  │
-│ Stripe MCP          │ local  │ each    │ Different keys!      │
-│ PostgreSQL MCP      │ local  │ each    │ Different databases! │
-│ MongoDB MCP         │ local  │ each    │ Different databases! │
-│ Vercel MCP          │ local  │ each    │ Different projects!  │
-│ Render MCP          │ local  │ each    │ Different services!  │
-│ Fly.io MCP          │ local  │ each    │ Different apps!      │
-│ Redis MCP           │ local  │ each    │ Different instances! │
-│ CLAUDE.md           │ local  │ each    │ Project-specific     │
-│ settings.json hooks │ local  │ each    │ Stack-specific       │
-│ Test framework      │ local  │ each    │ Stack-specific       │
-└─────────────────────┴────────┴─────────┴──────────────────────┘
+┌──────────────────────────┬────────┬─────────┬──────────────────────────────┐
+│ Component                │ Scope  │ Install │ Trigger / Reason             │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ GLOBAL MCPs (install once, forget)                                        │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ Context7 MCP             │ user   │ once    │ No account needed            │
+│ GitHub MCP (gh CLI)      │ user   │ once    │ One GitHub account           │
+│ Sentry MCP               │ user   │ once    │ One Sentry, all projects     │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ GLOBAL PLUGINS (install once, forget)                                     │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ security-guidance        │ plugin │ once    │ AUTOMATIC (PreToolUse hook)  │
+│ typescript-lsp           │ plugin │ once    │ AUTOMATIC (background LSP)   │
+│ pyright-lsp              │ plugin │ once    │ AUTOMATIC (background LSP)   │
+│ frontend-design          │ plugin │ once    │ SKILLS (auto when UI work)   │
+│ code-review              │ plugin │ once    │ SKILLS (auto during review)  │
+│ commit-commands          │ plugin │ once    │ COMMANDS: /commit, /commit-  │
+│                          │        │         │  push-pr, /clean_gone        │
+│ feature-dev              │ plugin │ once    │ COMMAND: /feature-dev        │
+│ pr-review-toolkit        │ plugin │ once    │ COMMAND: /pr-review-toolkit  │
+│ claude-md-management     │ plugin │ once    │ COMMAND: /revise-claude-md   │
+│ playwright               │ plugin │ once    │ SKILLS (auto for web tests)  │
+│ coderabbit               │ plugin │ once    │ COMMAND: /coderabbit:review  │
+│ Skills in ~/             │ global │ once    │ Your personal skills         │
+│ skill-loader hook        │ global │ once    │ AUTOMATIC (PrePrompt hook)   │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ PER-PROJECT MCPs (install per project)                                    │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ Supabase MCP             │ local  │ each    │ Different accounts!          │
+│ Stripe MCP               │ local  │ each    │ Different keys!              │
+│ PostgreSQL MCP           │ local  │ each    │ Different databases!         │
+│ MongoDB MCP              │ local  │ each    │ Different databases!         │
+│ Vercel MCP               │ local  │ each    │ Different projects!          │
+│ Render MCP               │ local  │ each    │ Different services!          │
+│ Fly.io MCP               │ local  │ each    │ Different apps!              │
+│ Redis MCP                │ local  │ each    │ Different instances!         │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ PER-PROJECT PLUGINS (questionnaire decides)                               │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ superpowers              │ local  │ maybe   │ TDD enforcement (prod only)  │
+│ figma                    │ local  │ maybe   │ If using Figma designs       │
+│ firecrawl                │ local  │ maybe   │ If need web scraping         │
+│ slack                    │ local  │ maybe   │ If collaborating via Slack   │
+│ gitlab                   │ local  │ maybe   │ If project uses GitLab       │
+│ firebase                 │ local  │ maybe   │ If project uses Firebase     │
+│ pinecone                 │ local  │ maybe   │ If project uses vector DB    │
+│ posthog                  │ local  │ maybe   │ If using PostHog analytics   │
+│ laravel-boost + php-lsp  │ local  │ maybe   │ If PHP/Laravel project       │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ PER-PROJECT CONFIG                                                        │
+├──────────────────────────┼────────┼─────────┼──────────────────────────────┤
+│ CLAUDE.md                │ local  │ each    │ Project-specific rules       │
+│ settings.json hooks      │ local  │ each    │ Stack-specific automation    │
+│ Test framework           │ local  │ each    │ Stack-specific               │
+└──────────────────────────┴────────┴─────────┴──────────────────────────────┘
 ```
 
 ---
 
-## 🔌 Plugins Deep Dive
+## 🔌 Key Plugins Explained
 
-### frontend-design (THIS Is What You Were Asking About!)
+### security-guidance (AUTOMATIC, zero-config)
 
-**What it is:** A plugin that makes Claude generate professional-looking UI
+**Trigger:** PreToolUse hook fires before every Write/Edit
+**What it catches:** XSS (dangerouslySetInnerHTML), command injection (os.system,
+child_process.exec), eval(), pickle deserialization, hardcoded secrets,
+GitHub Actions injection
+**Behavior:** Non-blocking warnings, session-scoped (warns once per pattern)
+**Coverage:** React, Django, FastAPI, Node, GitHub Actions
 
-**Auto-invoked:** Yes! When Claude works on frontend code, it automatically activates
+### typescript-lsp + pyright-lsp (AUTOMATIC, background)
 
-**What it does:**
-- Bold design choices (not boring defaults)
-- Professional typography and spacing
-- Proper color palette usage
-- Animations and transitions
-- Responsive design guidance
-- Visual details that make apps feel polished
-
-**Source:** [Medium guide](https://kasata.medium.com/how-to-install-and-use-frontend-design-claude-code-plugin-a-step-by-step-guide-0917d933cc6a)
-
-**Install:**
+**Trigger:** Language server runs silently, checks code after every edit
+**What it does:** Real-time type errors → Claude sees and self-corrects immediately.
+900x faster code navigation vs grep. ~200-500MB RAM per server.
+**Requirements:**
 ```bash
-/plugin install frontend-design@claude-code-plugin
+npm install -g typescript-language-server typescript  # for typescript-lsp
+pip install pyright                                   # for pyright-lsp
 ```
 
-### code-review (Complements CodeRabbit/Greptile)
+### frontend-design (SKILLS, auto-invoked)
 
-**What it is:** 5 parallel Sonnet agents that review your code
+**Trigger:** Auto-activates when Claude works on UI code
+**What it does:** Bold design choices, professional typography/spacing/colors,
+animations, responsive design. Makes UI look polished, not generic AI-generated.
 
+### commit-commands (COMMANDS)
+
+**Commands:**
+- `/commit` - Conventional Commit from staged diff (matches your project's style)
+- `/commit-push-pr` - Branch + commit + push + open PR with summary. One shot.
+- `/clean_gone` - Remove local branches deleted from remote + their worktrees
+
+### feature-dev (COMMAND, for non-trivial features)
+
+**Command:** `/feature-dev [description]`
+**What it does:** 7-phase workflow with 3 subagents:
+1. Discovery → 2. Codebase Exploration → 3. Clarifying Questions →
+4. Architecture Design → 5. Implementation → 6. Quality Review → 7. Summary
+**When to use:** New features. Skip for small bug fixes (overkill).
+
+### pr-review-toolkit (COMMAND, before PRs)
+
+**Command:** `/pr-review-toolkit:review-pr all`
+**6 agents:** comment-analyzer, test-coverage, silent-failure-hunter,
+type-design-analyzer, code-reviewer, code-simplifier
+**Key agent:** silent-failure-hunter catches empty catch blocks, inadequate
+logging, inappropriate fallbacks. Critical for solo devs.
+
+### claude-md-management (COMMAND, end of session)
+
+**Command:** `/revise-claude-md`
+**What it does:** Captures session learnings (bash commands discovered, code
+patterns, environment quirks) and proposes CLAUDE.md updates.
+**When to use:** End of productive sessions. Accumulates institutional knowledge.
+
+### superpowers (PER-PROJECT, production only)
+
+**What it does:** 20+ skills enforcing TDD (RED-GREEN-REFACTOR), YAGNI, planning,
+subagent-driven development. brainstorm → plan → execute → review pipeline.
+**WARNING:** Deletes code written before tests. Fights rapid prototyping.
+**Install:** Only on production projects: `/plugin install superpowers`
+**Do NOT install on MVPs/prototypes.**
+
+### code-review (SKILLS, auto during review)
+
+**What it is:** 5 parallel Sonnet agents
 **Different from CodeRabbit/Greptile:**
-- CodeRabbit/Greptile = External tools (review on GitHub/GitLab)
-- code-review plugin = Internal Claude Code review (before push)
+- code-review plugin = local review (before push, immediate)
+- CodeRabbit/Greptile = external review (on GitHub/GitLab, thorough)
 
 **They work TOGETHER:**
 ```
@@ -452,26 +664,11 @@ claude mcp add flyio [url]        # Project's Fly.io app
 4. Greptile reviews on GitHub/GitLab (thorough)
 ```
 
-**Install:**
-```bash
-/plugin install code-review@claude-code-plugin
-```
+### claude-code-setup (ONE-TIME per project)
 
-### webapp-testing (Playwright)
-
-**What it is:** Claude can open a browser and test your app
-
-**Use cases:**
-- "Test the login flow"
-- "Check if the checkout page works on mobile"
-- "Verify the form validation shows errors correctly"
-
-**Auto-invoked:** When Claude mentions testing a web page
-
-**Install:**
-```bash
-/plugin install webapp-testing@claude-code-plugin
-```
+**What it does:** Analyzes your codebase and recommends MCPs, skills, hooks.
+Read-only (never modifies files). Use as a second opinion alongside APPLY-SETUP.md.
+Run once per project, compare recommendations, take the best of both.
 
 ---
 
@@ -479,15 +676,20 @@ claude mcp add flyio [url]        # Project's Fly.io app
 
 ### Q: "Plugin exists AND MCP exists for same tool - which do I use?"
 
-**A: Use the plugin.** It includes the MCP + more.
+**A: Generally use the plugin.** It includes the MCP + more.
 
-| Tool | Plugin Exists? | Use |
-|------|---------------|-----|
-| CodeRabbit | ✅ Yes | Plugin (includes MCP + skill + /command) |
-| Sentry | ❌ No (MCP only) | MCP directly |
-| Vercel | ✅ Maybe | Check /plugin list, otherwise MCP |
-| Stripe | ❌ No (MCP only) | MCP directly |
-| Supabase | ❌ No (MCP only) | MCP directly |
+**Exceptions:** If your MCP is already working fine and the plugin just wraps the
+same MCP without adding skills/hooks/commands, keep the MCP.
+
+| Tool | Plugin Exists? | Use | Why |
+|------|---------------|-----|-----|
+| **Context7** | ✅ Yes (community) | **Keep MCP** | Plugin just wraps the same MCP. No extra skills/commands. |
+| **GitHub** | ✅ Yes | **Keep `gh` CLI** | `gh` CLI already covers everything. Plugin adds MCP wrapper with no real gain. |
+| **CodeRabbit** | ✅ Yes | **Plugin** | Plugin adds skill + /coderabbit:review command + hook on top of MCP. |
+| **Sentry** | ✅ Yes | **Plugin or MCP** | Either works. Plugin may add convenience commands. |
+| **Vercel** | ✅ Yes | **Plugin** | Check /plugin list for extra features. |
+| **Stripe** | ✅ Yes | **Plugin** | Install locally per project (different keys). |
+| **Supabase** | ✅ Yes | **Plugin** | Install locally per project (different accounts). |
 
 ### Q: "What if I install globally but need different accounts?"
 
@@ -583,10 +785,21 @@ claude mcp add supabase [url-for-project-a]
 cd ~/projects/project-b
 claude mcp add supabase [url-for-project-b]
 
-# 4. Install plugins globally
-/plugin install frontend-design@claude-code-plugin
-/plugin install code-review@claude-code-plugin
-/plugin install webapp-testing@claude-code-plugin
+# 4. Install plugins globally (Phase 1: auto-trigger)
+/plugin install security-guidance
+/plugin install typescript-lsp      # requires: npm i -g typescript-language-server typescript
+/plugin install pyright-lsp          # requires: pip install pyright
+
+# 5. Install plugins globally (Phase 2: skills + commands)
+/plugin install frontend-design
+/plugin install code-review
+/plugin install commit-commands
+/plugin install feature-dev
+/plugin install pr-review-toolkit
+/plugin install claude-md-management
+/plugin install playwright
+/plugin install claude-code-setup    # run once per project for recommendations
+/plugin install coderabbit           # if using CodeRabbit
 ```
 
 ---
@@ -600,20 +813,28 @@ This file supersedes parts of CORE-SETUP.md regarding installation scope.
 ```bash
 cd ~/projects/new-project
 
-# 1. Global stuff already installed (MCPs + plugins) ✅
+# 1. Global stuff already installed (MCPs + 12 plugins) ✅
 
-# 2. Add project-specific MCPs:
+# 2. Run the APPLY-SETUP.md workflow:
+#    - Claude auto-detects stack
+#    - Answers questionnaire (Figma? Firecrawl? Slack? Firebase? etc.)
+#    - Runs claude-code-setup plugin for second opinion
+#    - Generates CLAUDE.md + settings.json
+
+# 3. Add project-specific MCPs:
 claude mcp add supabase [url]    # if using Supabase
 claude mcp add stripe [url]      # if using Stripe
 claude mcp add postgres [url]    # if using PostgreSQL
 claude mcp add vercel [url]      # if deploying to Vercel
 # etc.
 
-# 3. Create project config:
-mkdir -p .claude
-# Create CLAUDE.md and settings.json (see APPLY-SETUP.md)
+# 4. Add conditional plugins (from questionnaire):
+/plugin install superpowers       # if production app with TDD
+/plugin install figma             # if using Figma designs
+/plugin install firecrawl         # if need web scraping
+# etc.
 
-# 4. Done! Global plugins + project MCPs + project config = complete setup
+# 5. Done! Global plugins + project MCPs + project plugins + config = complete
 ```
 
 ---

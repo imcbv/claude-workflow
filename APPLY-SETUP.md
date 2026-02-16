@@ -33,20 +33,53 @@ Please analyze this repository and recommend the complete setup:
    - Naming convention for each
    - Which DSN environment variables to set
 
-4. **Generate CLAUDE.md:**
+4. **Project questionnaire (answer these):**
+   - Is this a **production app** or **MVP/prototype**?
+     → If production: install superpowers plugin (TDD enforcement)
+   - Will you use **Figma designs** for this project?
+     → If yes: install figma plugin
+   - Does this project need **web scraping/research**?
+     → If yes: install firecrawl plugin
+   - Do you **collaborate with others via Slack** on this project?
+     → If yes: install slack plugin
+   - Does this project use **GitLab** (not GitHub)?
+     → If yes: install gitlab plugin locally
+   - Does this project use **Firebase**?
+     → If yes: install firebase plugin locally
+   - Does this project use **vector search / Pinecone**?
+     → If yes: install pinecone plugin locally
+   - Does this project use **PostHog** for analytics?
+     → If yes: install posthog plugin locally
+   - Is this a **PHP/Laravel** project?
+     → If yes: install laravel-boost + php-lsp locally
+
+5. **Run claude-code-setup plugin** (second opinion):
+   - Compare its recommendations with your own analysis
+   - Adopt any suggestions that improve the setup
+   - This plugin is read-only and safe to run
+
+6. **Generate CLAUDE.md:**
    - Based on detected stack
    - Include project-specific rules
    - Add Sentry configuration
+   - Add workflow rules for slash commands:
+     ```
+     ## Workflow Rules
+     - Before committing: use /commit (commit-commands plugin)
+     - Before PRs: run /pr-review-toolkit:review-pr all
+     - End of session: run /revise-claude-md
+     - New features: use /feature-dev for non-trivial features
+     ```
 
-5. **Generate .claude/settings.json:**
+7. **Generate .claude/settings.json:**
    - Appropriate hooks for this project type
    - Auto-test hook if production app
    - Skill loader hook
    - Auto-format hook
 
-6. **Provide setup checklist:**
+8. **Provide setup checklist:**
    - Step-by-step commands to run
-   - What to install where
+   - What to install where (global plugins already installed, only per-project items needed)
    - How to test each component
 
 Please be specific and thorough. I want to copy-paste the commands.
@@ -109,7 +142,27 @@ EOF
 - vercel.json → Vercel
 - render.yaml → Render
 - fly.toml → Fly.io
+- railway.toml or Procfile → Railway
 - .elasticbeanstalk/ → AWS Beanstalk
+
+# Docker detection
+- Has Dockerfile → Docker containerized app
+- Has docker-compose.yml or compose.yml → Multi-container setup
+- Has .dockerignore → Docker project
+
+# Queue system detection
+- package.json has bullmq → BullMQ (Redis-backed job queue)
+- requirements.txt has celery → Celery task queue
+- .env has REDIS_URL → Redis (may be queue backend)
+
+# Runtime detection
+- Has deno.json or deno.jsonc → Deno runtime
+
+# CMS detection
+- Has strapi in package.json → Strapi CMS
+
+# Mobile framework detection
+- Has expo in package.json → Expo (React Native)
 
 # Monorepo detection
 - Has apps/, packages/, services/ → Monorepo
@@ -641,24 +694,41 @@ cat ~/Documents/Code/claude-workflow/PROJECT-TEMPLATES/[your-stack].md
 ✅ Backend framework (FastAPI, Django, Express, etc.)
 ✅ Database (PostgreSQL, MongoDB, Supabase)
 ✅ Payments (Stripe detection)
-✅ Deployment platform (Vercel, Render, Fly.io)
+✅ Deployment platform (Vercel, Render, Fly.io, Railway)
+✅ Docker (Dockerfile, docker-compose.yml)
+✅ Queue systems (BullMQ, Celery)
+✅ Runtime (Deno, Node)
+✅ Mobile (Expo, Capacitor)
+✅ CMS (Strapi)
 ✅ Monorepo structure
 ✅ Number of Sentry projects needed
 
 ### What Claude Recommends
 
-✅ Which MCPs to install
+✅ Which MCPs to install (per-project, local scope)
+✅ Which per-project plugins to install (based on questionnaire)
 ✅ How many Sentry projects
 ✅ Naming convention for Sentry projects
 ✅ Which hooks to enable
-✅ CLAUDE.md configuration
+✅ CLAUDE.md configuration (including workflow rules for slash commands)
 ✅ settings.json configuration
 ✅ Step-by-step setup checklist
+✅ Cross-check with claude-code-setup plugin recommendations
+
+### What's Already Installed Globally (No Per-Project Action Needed)
+
+✅ Global MCPs: Context7, GitHub (gh CLI), Sentry
+✅ Global plugins: security-guidance, typescript-lsp, pyright-lsp,
+   frontend-design, code-review, commit-commands, feature-dev,
+   pr-review-toolkit, claude-md-management, playwright, claude-code-setup,
+   coderabbit
+✅ Global hooks: skill-loader (PrePrompt)
 
 ### Frontend Skills
 
 ❌ No pre-made frontend skills exist
 ✅ Use `/insights` after 20+ sessions (auto-generates based on YOUR patterns)
+✅ frontend-design plugin handles UI quality (auto-invoked)
 ⚪ Optional: Create custom skill manually (example provided above)
 
 ---

@@ -135,27 +135,6 @@ claude
 
 Simpler but less efficient than tmux.
 
-#### Option C: Ralph Orchestrator (Advanced)
-
-```bash
-# Install Ralph (multi-agent orchestrator)
-npm install -g ralph-orchestrator
-
-# Run parallel agents via worktrees
-# Terminal 1
-ralph run -p "Add authentication"
-
-# Terminal 2
-ralph run -p "Fix payment bug"
-```
-
-**Features:**
-- Multi-loop concurrency via git worktrees
-- Zero conflicts
-- Orchestrates multiple Claude Code instances
-
-**Source:** @mikeyobrienv (21 likes, 4 reposts) - "Ralph Orchestrator v2.2.3 just dropped. New: Multi-loop concurrency via git worktrees."
-
 ---
 
 ## The Complete Workflow
@@ -428,11 +407,9 @@ git worktree remove ../path/to/worktree
 - [r/ClaudeCode: Subtask - spawns subagents in worktrees](https://www.reddit.com/r/ClaudeCode/comments/1qhzagf/subtask_claude_code_creates_tasks_and_spawns/) (263 upvotes)
 - @kellypeilinchan (4 likes): tmux + worktrees workflow
 - @dgalarza (4 likes, 3 reposts): Parallel agents tutorial
-- @mikeyobrienv (21 likes, 4 reposts): Ralph Orchestrator
 
 ### Tools
 - [tmux](https://github.com/tmux/tmux) - Terminal multiplexer
-- [Ralph Orchestrator](https://github.com/mikeyobrienv/ralph-orchestrator) - Multi-agent orchestration
 - [CCC](https://www.threads.com/@naa_rang) - Mobile IDE with worktree support
 
 ---

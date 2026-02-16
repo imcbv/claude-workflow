@@ -9,25 +9,34 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Auto mode: set CLAUDE_WORKFLOW_AUTO=1 to skip interactive prompts
+AUTO="${CLAUDE_WORKFLOW_AUTO:-0}"
+
 echo ""
 echo "=================================================="
 echo "  Claude Code Global Setup"
 echo "  This installs everything you need, once."
+echo "  Platform: macOS only"
 echo "=================================================="
 echo ""
 
 # -----------------------------------------------------------------------------
 # Pre-flight: close running Claude Code instances
 # -----------------------------------------------------------------------------
-if pgrep -f "claude" > /dev/null 2>&1; then
-  CLAUDE_COUNT=$(pgrep -f "claude" | wc -l | tr -d ' ')
+CLAUDE_PIDS=$(pgrep -x "claude" 2>/dev/null || true)
+if [ -n "$CLAUDE_PIDS" ]; then
+  CLAUDE_COUNT=$(echo "$CLAUDE_PIDS" | wc -l | tr -d ' ')
   echo "  Found $CLAUDE_COUNT running Claude Code process(es)."
   echo "  This script installs global MCPs and plugins, which can conflict"
   echo "  with running sessions."
   echo ""
-  read -p "  Kill all Claude Code instances and continue? [y/n]: " KILL_CLAUDE
+  if [ "$AUTO" = "1" ]; then
+    KILL_CLAUDE="y"
+  else
+    read -p "  Kill all Claude Code instances and continue? [y/n]: " KILL_CLAUDE
+  fi
   if [ "$KILL_CLAUDE" = "y" ]; then
-    pkill -f "claude" 2>/dev/null || true
+    pkill -x "claude" 2>/dev/null || true
     sleep 1
     echo "  [OK] Claude Code instances terminated."
   else
@@ -54,41 +63,51 @@ step() { echo ""; echo "--- $1 ---"; }
 # -----------------------------------------------------------------------------
 step "Step 1/6: Prerequisites"
 
+# Platform check
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  echo "  ERROR: This script only supports macOS."
+  echo "  For Linux, install the dependencies manually."
+  exit 1
+fi
+
 # Homebrew (macOS)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if check_installed brew; then
     skip "Homebrew"
   else
     echo "  Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    BREW_INSTALLER="/tmp/homebrew-install.sh"
+    curl -fsSL --connect-timeout 10 -o "$BREW_INSTALLER" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh || { fail "Failed to download Homebrew installer"; exit 1; }
+    /bin/bash "$BREW_INSTALLER"
+    rm -f "$BREW_INSTALLER"
+    command -v brew &> /dev/null || { fail "Homebrew not found after install"; exit 1; }
     ok "Homebrew installed"
   fi
 fi
 
-# Node.js
+# Node.js (>= 18 required for Claude Code npm install)
 if check_installed node; then
-  skip "Node.js ($(node --version))"
+  NODE_VERSION=$(node --version | tr -d 'v')
+  NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
+  if [ "$NODE_MAJOR" -lt 18 ]; then
+    echo "  Node.js $NODE_VERSION is too old (need >= 18). Upgrading..."
+    brew install node
+    ok "Node.js upgraded"
+  else
+    skip "Node.js (v$NODE_VERSION)"
+  fi
 else
   echo "  Installing Node.js..."
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install node
-  else
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-  fi
+  brew install node
   ok "Node.js installed"
 fi
 
-# Python 3
+# Python 3 (>= 3.7 required for pyright)
 if check_installed python3; then
   skip "Python 3 ($(python3 --version 2>&1))"
 else
   echo "  Installing Python 3..."
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install python3
-  else
-    sudo apt-get install -y python3 python3-pip
-  fi
+  brew install python3
   ok "Python 3 installed"
 fi
 
@@ -97,11 +116,7 @@ if check_installed git; then
   skip "Git ($(git --version))"
 else
   echo "  Installing Git..."
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install git
-  else
-    sudo apt-get install -y git
-  fi
+  brew install git
   ok "Git installed"
 fi
 
@@ -114,11 +129,7 @@ if check_installed tmux; then
   skip "tmux ($(tmux -V))"
 else
   echo "  Installing tmux..."
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install tmux
-  else
-    sudo apt-get install -y tmux
-  fi
+  brew install tmux
   ok "tmux installed"
 fi
 
@@ -141,12 +152,15 @@ if check_installed claude; then
   skip "Claude Code (already installed)"
 else
   echo "  Installing Claude Code..."
-  npm install -g @anthropic-ai/claude-code
+  npm install -g @anthropic-ai/claude-code || { fail "npm install failed"; exit 1; }
+  command -v claude &> /dev/null || { fail "claude command not found after install — check your PATH"; exit 1; }
   ok "Claude Code installed"
   echo ""
   echo "  IMPORTANT: Run 'claude' once to authenticate before continuing."
-  echo "  Press Enter after you've authenticated..."
-  read -r
+  if [ "$AUTO" != "1" ]; then
+    echo "  Press Enter after you've authenticated..."
+    read -r
+  fi
 fi
 
 # Check for updates
@@ -203,21 +217,28 @@ PLUGINS=(
   "coderabbit"
 )
 
+FAILED_PLUGINS=()
 for plugin in "${PLUGINS[@]}"; do
   echo "  Installing $plugin..."
-  claude /plugin install "$plugin" 2>/dev/null || echo "    (may need manual install: /plugin install $plugin)"
+  if claude /plugin install "$plugin" 2>/dev/null; then
+    ok "$plugin"
+  else
+    fail "$plugin"
+    FAILED_PLUGINS+=("$plugin")
+  fi
 done
 
 echo ""
-ok "Plugin installation attempted for all ${#PLUGINS[@]} plugins"
-echo ""
-echo "  NOTE: If any plugins failed, open Claude Code and run:"
-echo "  /plugin install <plugin-name>"
-echo ""
-echo "  Installed plugins:"
-for plugin in "${PLUGINS[@]}"; do
-  echo "    - $plugin"
-done
+SUCCEEDED=$(( ${#PLUGINS[@]} - ${#FAILED_PLUGINS[@]} ))
+ok "$SUCCEEDED/${#PLUGINS[@]} plugins installed"
+
+if [ ${#FAILED_PLUGINS[@]} -gt 0 ]; then
+  echo ""
+  echo "  WARNING: ${#FAILED_PLUGINS[@]} plugin(s) failed to install:"
+  for p in "${FAILED_PLUGINS[@]}"; do
+    echo "    - $p  (retry: /plugin install $p)"
+  done
+fi
 
 # -----------------------------------------------------------------------------
 # Step 6: Global MCPs
@@ -233,7 +254,8 @@ echo "  Installing Context7 MCP..."
 if claude mcp list 2>/dev/null | grep -q "context7"; then
   skip "Context7 MCP"
 else
-  claude mcp add --scope user context7 -- npx -y @anthropic-ai/context7-mcp
+  claude mcp add --scope user context7 -- npx -y @anthropic-ai/context7-mcp || { fail "Context7 MCP install failed"; exit 1; }
+  claude mcp list 2>/dev/null | grep -q "context7" || { fail "Context7 MCP not found after install"; exit 1; }
   ok "Context7 MCP installed"
 fi
 
@@ -242,7 +264,8 @@ echo "  Installing Sentry MCP..."
 if claude mcp list 2>/dev/null | grep -q "sentry"; then
   skip "Sentry MCP"
 else
-  claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp
+  claude mcp add --scope user --transport http sentry https://mcp.sentry.dev/mcp || { fail "Sentry MCP install failed"; exit 1; }
+  claude mcp list 2>/dev/null | grep -q "sentry" || { fail "Sentry MCP not found after install"; exit 1; }
   ok "Sentry MCP installed"
 fi
 
@@ -272,5 +295,5 @@ echo ""
 echo "       New project:      $REPO_DIR/scripts/setup-new.sh"
 echo "       Existing project: $REPO_DIR/scripts/setup-existing.sh"
 echo ""
-echo "  Full documentation: $REPO_DIR/README.md"
+echo "  To undo this setup: see $REPO_DIR/README.md#uninstall"
 echo ""

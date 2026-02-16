@@ -190,28 +190,21 @@ EOF
 ```
 📦 Recommended MCPs to install:
 
-**Essential (already installed):**
-✅ Context7 - Library documentation
-✅ GitHub - Repository management
+**Already installed globally (setup-global.sh):**
+✅ Context7 - Library documentation (--scope user)
+✅ Sentry - Error tracking, all projects via OAuth (--scope user)
 
-**Install these for your stack:**
+**Install these locally per-project:**
 🔧 PostgreSQL MCP - Query database, generate migrations
-   Install: [Check Claude Code settings or MCP registry]
-
 🔧 Stripe MCP - Test payments, query customers
-   Install: claude mcp add --transport http stripe https://stripe-mcp-server-url
-
-🔧 Sentry MCP - Error tracking and debugging
-   Install: claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
-
+🔧 Supabase MCP - Database + auth management
 🔧 Vercel MCP - Deploy, view logs, manage env vars
-   Install: [Check if already available in tools]
-
 🔧 Render MCP - Deploy backend, manage services
-   Install: [Check if already available in tools]
 
-**Optional:**
-⚪ Sequential Thinking MCP - Complex problem solving
+NOTE: Sentry MCP is global because it uses OAuth (one login = access
+to ALL your Sentry projects). No per-project config needed.
+Project-specific MCPs like Supabase, Stripe, PostgreSQL need local
+scope because they use different API keys/credentials per project.
 ```
 
 ---

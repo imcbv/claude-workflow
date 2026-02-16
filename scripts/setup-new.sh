@@ -9,9 +9,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Sanitize user input: strip characters that could cause issues in prompts
+sanitize() { printf '%s' "$1" | tr -d '`$(){}\\'; }
+
 echo ""
 echo "=================================================="
 echo "  Claude Code - New Project Setup"
+echo "  Platform: macOS only"
 echo "=================================================="
 echo ""
 
@@ -87,16 +91,13 @@ echo ""
 read -p "     Optional tools: " OPTIONAL_TOOLS
 echo ""
 
-# Git repo
+# Git repo (required)
 if [ -d ".git" ]; then
   echo "  Git repo detected."
 else
-  read -p "  Initialize git repo? [y/n]: " INIT_GIT
-  if [ "$INIT_GIT" = "y" ]; then
-    git init
-    echo "  Git repo initialized."
-  fi
-  echo ""
+  echo "  No git repo found. Initializing..."
+  git init
+  echo "  Git repo initialized."
 fi
 
 # -----------------------------------------------------------------------------
@@ -105,6 +106,13 @@ fi
 echo ""
 echo "--- Setting up project with Claude Code ---"
 echo ""
+
+# Sanitize user inputs
+TECH_STACK=$(sanitize "$TECH_STACK")
+DATABASE=$(sanitize "$DATABASE")
+DEPLOYMENT=$(sanitize "$DEPLOYMENT")
+PAYMENTS=$(sanitize "$PAYMENTS")
+OPTIONAL_TOOLS=$(sanitize "$OPTIONAL_TOOLS")
 
 # Map project type
 case "$PROJECT_TYPE" in

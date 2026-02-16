@@ -58,7 +58,7 @@ Read through all research outputs and identify:
 
 **1. New Tools / Features**
 - Example: "/insights skill" (discovered Feb 2026)
-- Example: "Ralph Orchestrator v2.2.3 with worktree support"
+- Example: "New plugin for X with Y community adoption"
 
 **2. Changed Recommendations**
 - Example: "Opus 4.6 regression - revert to 4.5 for now"

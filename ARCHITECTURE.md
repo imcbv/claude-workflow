@@ -368,7 +368,6 @@ assessment (APPLY-SETUP.md) asks about these:
 | hookify | Claude already writes hooks for you when asked. Buggy. |
 | code-simplifier | Token cost (pay twice). Bug modifies string literals. |
 | serena | Overlaps with typescript-lsp + pyright-lsp. Connection issues. |
-| ralph-loop | Autonomous loops. Token burn risk. Hard to control. |
 | atlassian | Solo dev, not using Jira/Confluence. |
 | linear | Solo dev, not using Linear. |
 | asana | Solo dev, not using Asana. |

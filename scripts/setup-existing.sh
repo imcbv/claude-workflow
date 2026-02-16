@@ -9,9 +9,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Sanitize user input: strip characters that could cause issues in prompts
+sanitize() { printf '%s' "$1" | tr -d '`$(){}\\'; }
+
 echo ""
 echo "=================================================="
 echo "  Claude Code - Existing Project Setup"
+echo "  Platform: macOS only"
 echo "=================================================="
 echo ""
 
@@ -64,6 +68,9 @@ echo "     docker     - Project uses Docker/containers"
 echo ""
 read -p "     Optional tools: " OPTIONAL_TOOLS
 echo ""
+
+# Sanitize user inputs
+OPTIONAL_TOOLS=$(sanitize "$OPTIONAL_TOOLS")
 
 # Map project type
 case "$PROJECT_TYPE" in

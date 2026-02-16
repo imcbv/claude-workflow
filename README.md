@@ -148,4 +148,47 @@ The scripts handle everything, but if you want to understand the details:
 
 ---
 
+## Uninstall
+
+To remove everything this setup installed:
+
+```bash
+# Remove global MCPs
+claude mcp remove --scope user context7
+claude mcp remove --scope user sentry
+
+# Remove global plugins
+claude /plugin uninstall security-guidance typescript-lsp pyright-lsp \
+  frontend-design code-review commit-commands feature-dev pr-review-toolkit \
+  claude-md-management playwright claude-code-setup coderabbit
+
+# Remove LSP servers
+npm uninstall -g typescript-language-server typescript
+pip3 uninstall pyright -y
+
+# Remove per-project config (run from inside the project)
+rm -rf .claude/
+
+# Remove this repo
+rm -rf ~/Documents/Code/claude-workflow
+```
+
+To remove just a project's local setup (without touching global):
+```bash
+cd ~/projects/my-app
+rm -rf .claude/
+claude mcp list  # check for project-local MCPs and remove them
+```
+
+---
+
+## Requirements
+
+- **macOS** (scripts are macOS-only)
+- **Node.js >= 18** (for Claude Code npm install)
+- **Python >= 3.7** (for pyright)
+- **Git**
+
+---
+
 **License:** MIT

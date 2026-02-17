@@ -61,7 +61,7 @@ step() { echo ""; echo "--- $1 ---"; }
 # -----------------------------------------------------------------------------
 # Step 1: Prerequisites
 # -----------------------------------------------------------------------------
-step "Step 1/6: Prerequisites"
+step "Step 1/8: Prerequisites"
 
 # Platform check
 if [[ "$OSTYPE" != "darwin"* ]]; then
@@ -123,7 +123,7 @@ fi
 # -----------------------------------------------------------------------------
 # Step 2: tmux (for parallel worktrees)
 # -----------------------------------------------------------------------------
-step "Step 2/6: tmux (parallel agents)"
+step "Step 2/8: tmux (parallel agents)"
 
 if check_installed tmux; then
   skip "tmux ($(tmux -V))"
@@ -146,7 +146,7 @@ echo "    tmux attach             Reattach"
 # -----------------------------------------------------------------------------
 # Step 3: Claude Code
 # -----------------------------------------------------------------------------
-step "Step 3/6: Claude Code"
+step "Step 3/8: Claude Code"
 
 if check_installed claude; then
   skip "Claude Code (already installed)"
@@ -172,7 +172,7 @@ npm outdated -g @anthropic-ai/claude-code 2>/dev/null && echo "  Update availabl
 # -----------------------------------------------------------------------------
 # Step 4: LSP Dependencies
 # -----------------------------------------------------------------------------
-step "Step 4/6: LSP dependencies"
+step "Step 4/8: LSP dependencies"
 
 # TypeScript LSP
 if check_installed typescript-language-server; then
@@ -195,7 +195,7 @@ fi
 # -----------------------------------------------------------------------------
 # Step 5: Global Plugins
 # -----------------------------------------------------------------------------
-step "Step 5/6: Global Plugins (12 plugins)"
+step "Step 5/8: Global Plugins (12 plugins)"
 
 echo ""
 echo "  Installing plugins... (this opens Claude Code briefly for each one)"
@@ -241,9 +241,42 @@ if [ ${#FAILED_PLUGINS[@]} -gt 0 ]; then
 fi
 
 # -----------------------------------------------------------------------------
-# Step 6: Global MCPs
+# Step 6: Global Skills
 # -----------------------------------------------------------------------------
-step "Step 6/6: Global MCPs"
+step "Step 6/8: Global Skills (/last30days)"
+
+echo ""
+echo "  Installing global skills..."
+echo ""
+
+# /last30days skill (research tool for monthly updates)
+SKILLS_DIR="$HOME/.claude/skills"
+LAST30_DIR="$SKILLS_DIR/last30days"
+
+if [ -d "$LAST30_DIR" ]; then
+  skip "/last30days skill (already installed)"
+  echo "  Checking for updates..."
+  (cd "$LAST30_DIR" && git pull --quiet 2>/dev/null) && ok "/last30days updated" || echo "  Could not update (offline?). Continuing."
+else
+  echo "  Installing /last30days skill..."
+  mkdir -p "$SKILLS_DIR"
+  git clone https://github.com/mvanhorn/last30days-skill.git "$LAST30_DIR" 2>/dev/null || { fail "/last30days clone failed"; }
+  if [ -f "$LAST30_DIR/SKILL.md" ]; then
+    ok "/last30days skill installed"
+  else
+    fail "/last30days skill — SKILL.md not found after clone"
+  fi
+fi
+
+echo ""
+echo "  /last30days lets you research any topic from the last 30 days."
+echo "  Usage: /last30days recommended claude code setup indie hacker 2026"
+echo "  Used by: scripts/update.sh (monthly workflow updates)"
+
+# -----------------------------------------------------------------------------
+# Step 7: Global MCPs
+# -----------------------------------------------------------------------------
+step "Step 7/8: Global MCPs"
 
 echo ""
 echo "  Installing global MCPs (Context7 + Sentry)..."
@@ -270,6 +303,64 @@ else
 fi
 
 # -----------------------------------------------------------------------------
+# Step 8: Verification
+# -----------------------------------------------------------------------------
+step "Step 8/8: Verification"
+
+echo ""
+echo "  Quick verification..."
+VERIFY_PASS=0
+VERIFY_FAIL=0
+
+# Check claude command
+if check_installed claude; then
+  ok "claude command available"
+  VERIFY_PASS=$((VERIFY_PASS + 1))
+else
+  fail "claude command not found"
+  VERIFY_FAIL=$((VERIFY_FAIL + 1))
+fi
+
+# Check tmux
+if check_installed tmux; then
+  ok "tmux available"
+  VERIFY_PASS=$((VERIFY_PASS + 1))
+else
+  fail "tmux not found"
+  VERIFY_FAIL=$((VERIFY_FAIL + 1))
+fi
+
+# Check LSP
+if check_installed typescript-language-server; then
+  ok "TypeScript LSP available"
+  VERIFY_PASS=$((VERIFY_PASS + 1))
+else
+  fail "TypeScript LSP not found"
+  VERIFY_FAIL=$((VERIFY_FAIL + 1))
+fi
+
+# Check /last30days
+if [ -f "$HOME/.claude/skills/last30days/SKILL.md" ]; then
+  ok "/last30days skill available"
+  VERIFY_PASS=$((VERIFY_PASS + 1))
+else
+  fail "/last30days skill not found"
+  VERIFY_FAIL=$((VERIFY_FAIL + 1))
+fi
+
+# Check MCPs
+if claude mcp list 2>/dev/null | grep -q "context7"; then
+  ok "Context7 MCP configured"
+  VERIFY_PASS=$((VERIFY_PASS + 1))
+else
+  fail "Context7 MCP not found"
+  VERIFY_FAIL=$((VERIFY_FAIL + 1))
+fi
+
+echo ""
+ok "$VERIFY_PASS checks passed, $VERIFY_FAIL failed"
+
+# -----------------------------------------------------------------------------
 # Done
 # -----------------------------------------------------------------------------
 echo ""
@@ -281,16 +372,22 @@ echo "  What was installed:"
 echo "    - tmux (parallel agents)"
 echo "    - TypeScript Language Server + Pyright (LSP)"
 echo "    - 12 Claude Code plugins (global)"
+echo "    - /last30days skill (research tool)"
 echo "    - Context7 MCP (library documentation)"
 echo "    - Sentry MCP (error tracking)"
 echo ""
 echo "  Manual steps (do these yourself):"
 echo "    - [ ] Open Claude Code and run /mcp to authenticate Sentry (one-time OAuth)"
 echo ""
+echo "  How things work after install:"
+echo "    AUTOMATIC (just works):     Security scanning, type checking, UI design skills"
+echo "    YOU TYPE A COMMAND:          /commit, /feature-dev, /last30days, /pr-review-toolkit"
+echo "    CLAUDE USES WHEN RELEVANT:  Context7 (docs), Sentry (errors), Playwright (testing)"
+echo ""
+echo "  Full reference: $REPO_DIR/USAGE-REFERENCE.md"
+echo ""
 echo "  Next steps:"
-echo "    1. Verify plugins: open Claude Code, run /plugin list"
-echo "    2. Verify MCPs: open Claude Code, run 'claude mcp list'"
-echo "    3. Set up a project:"
+echo "    1. Set up a project:"
 echo ""
 echo "       New project:      $REPO_DIR/scripts/setup-new.sh"
 echo "       Existing project: $REPO_DIR/scripts/setup-existing.sh"

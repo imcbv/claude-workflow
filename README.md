@@ -8,7 +8,7 @@ Set up the perfect Claude Code configuration for any project. One-time global in
 
 ### 1. First Time? Global Setup
 
-Run this once on your machine. Installs everything: Claude Code, tmux (parallel agents), LSP servers, 12 global plugins.
+Run this once on your machine. Installs everything: Claude Code, tmux (parallel agents), LSP servers, 12 global plugins, /last30days research skill.
 
 ```bash
 git clone https://github.com/imcbv/claude-workflow.git ~/Documents/Code/claude-workflow
@@ -20,8 +20,11 @@ cd ~/Documents/Code/claude-workflow
 - tmux (run multiple Claude agents side by side)
 - TypeScript + Python language servers (real-time type checking)
 - 12 plugins: security scanning, code review, commit automation, UI design, PR review, and more
+- /last30days skill (research any topic from the last 30 days)
 
 Takes ~15 minutes. Never needs to run again.
+
+> **Which of these are automatic?** See [USAGE-REFERENCE.md](USAGE-REFERENCE.md) for exactly what runs silently vs what you invoke.
 
 ### 2. New Project
 
@@ -119,6 +122,7 @@ The scripts handle everything, but if you want to understand the details:
 
 | Doc | What's In It |
 |-----|-------------|
+| [USAGE-REFERENCE.md](USAGE-REFERENCE.md) | **Start here:** What's automatic vs what you invoke, how to ask for tool recommendations |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Plugins vs MCPs vs Skills, what's global vs local, complete plugin list |
 | [CORE-SETUP.md](CORE-SETUP.md) | Essential MCPs, CLAUDE.md template, hooks |
 | [TESTING-GUIDE.md](TESTING-GUIDE.md) | When to test, TDD workflow, framework setup |
@@ -161,6 +165,9 @@ claude mcp remove --scope user sentry
 claude /plugin uninstall security-guidance typescript-lsp pyright-lsp \
   frontend-design code-review commit-commands feature-dev pr-review-toolkit \
   claude-md-management playwright claude-code-setup coderabbit
+
+# Remove global skills
+rm -rf ~/.claude/skills/last30days
 
 # Remove LSP servers
 npm uninstall -g typescript-language-server typescript
